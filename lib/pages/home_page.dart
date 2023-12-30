@@ -14,6 +14,9 @@ class _HomePageState extends State<HomePage> {
   final style = const TextStyle();
   int _currentIndex = 0;
 
+  // text controller
+  final myTextController = TextEditingController();
+
   // list of to do tasks
   final List toDoList = [
     ["Take A Shower", false],
@@ -27,13 +30,33 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // add task
+  void saveNewTaskz() {
+    setState(() {
+      toDoList.add([myTextController.text, false]);
+      myTextController.clear();
+    });
+    Navigator.of(context).pop();
+  }
+
   // create new task
   void createNewTaskz() {
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          return const DialogBox();
+          return DialogBox(
+            controller: myTextController,
+            onPressAdd: saveNewTaskz,
+            onPressCancel: () => Navigator.of(context).pop(),
+          );
         });
+  }
+
+  // delete task
+  void deleteTaskz(int index) {
+    setState(() {
+      toDoList.removeAt(index);
+    });
   }
 
   @override
@@ -60,14 +83,17 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        body: ListView.builder(
-          itemCount: toDoList.length,
-          itemBuilder: (context, index) {
-            return ToDoTile(
-                taskName: toDoList[index][0],
-                completedTask: toDoList[index][1],
-                onChanged: (value) => changeCheckbox(value, index));
-          },
+        body: Scrollbar(
+          child: ListView.builder(
+            itemCount: toDoList.length,
+            itemBuilder: (context, index) {
+              return ToDoTile(
+                  delete: (context) => deleteTaskz(index),
+                  taskName: toDoList[index][0],
+                  completedTask: toDoList[index][1],
+                  onChanged: (value) => changeCheckbox(value, index));
+            },
+          ),
         ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.orange,
